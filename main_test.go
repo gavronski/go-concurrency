@@ -1,15 +1,18 @@
 package main
 
-import "testing"
+import (
+	"app/waitGroup"
+	"testing"
+)
 
 func Test_updateMessage(t *testing.T) {
-	wg.Add(1)
+	waitGroup.Wg.Add(1)
 
-	go updateMessage("test", &wg)
+	go waitGroup.UpdateMessage("test", &waitGroup.Wg)
 
-	wg.Wait()
+	waitGroup.Wg.Wait()
 
-	if msg != "test" {
+	if waitGroup.Msg != "test" {
 		t.Error("missing expected 'test'")
 	}
 }
