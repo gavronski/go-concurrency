@@ -1,32 +1,17 @@
 package main
 
 import (
+	"app/deadLock"
+	"app/waitGroup"
 	"fmt"
 	"sync"
 )
 
-var msg string
-var wg sync.WaitGroup
-
-type Income struct {
-	Source string
-	Amount int
-}
-
-func updateMessage(s string, wg *sync.WaitGroup) {
-	// decrement wait group num by one
-	defer wg.Done()
-	msg = s
-}
-
-func printMessage() {
-	fmt.Println(msg)
-}
-
 func main() {
-	msg = "test1"
+	waitGroup.Msg = "test1"
 	var bankBalance int = 0
 	var m sync.Mutex
+
 	var messages = []string{
 		"test1",
 		"test2",
@@ -35,27 +20,27 @@ func main() {
 
 	// printing always in message varaible order
 	for _, e := range messages {
-		// put in only one thin in wait group
-		wg.Add(1)
+		// put in only one thing in wait group
+		waitGroup.Wg.Add(1)
 
-		go updateMessage(e, &wg)
+		go waitGroup.UpdateMessage(e, &waitGroup.Wg)
 
-		wg.Wait()
-		printMessage()
+		waitGroup.Wg.Wait()
+		waitGroup.PrintMessage()
 	}
 
-	incomes := []Income{
+	incomes := []waitGroup.Income{
 		{Source: "Job", Amount: 1000},
 		{Source: "Gifts", Amount: 5},
 		{Source: "Walking dogs", Amount: 50},
 	}
 
-	wg.Add(len(incomes))
+	waitGroup.Wg.Add(len(incomes))
 
 	for _, income := range incomes {
 
-		go func(income Income) {
-			defer wg.Done()
+		go func(income waitGroup.Income) {
+			defer waitGroup.Wg.Done()
 			for i := 1; i <= 52; i++ {
 				m.Lock()
 				tmp := bankBalance
@@ -67,5 +52,10 @@ func main() {
 		}(income)
 	}
 
-	wg.Wait()
+	waitGroup.Wg.Wait()
+
+	//deadlock
+
+	collection := deadLock.NewCollection()
+	collection.Add("test", "test")
 }
